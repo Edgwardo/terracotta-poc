@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+model Property {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  units     Unit[]
+  createdAt DateTime @default(now())
+}
+
+model Unit {
+  id         String   @id @default(uuid())
+  propertyId String
+  unitNumber String
+  bedrooms   Int
+  property   Property @relation(fields: [propertyId], references: [id])
+  tenants    Tenant[]
+  createdAt  DateTime @default(now())
+
+  @@unique([propertyId, unitNumber])
+}
+
+model Tenant {
+  id             String        @id @default(uuid())
+  unitId         String
+  fullName       String
+  monthlyRent    Decimal       @db.Decimal(10, 2)
+  currentBalance Decimal       @default(0) @db.Decimal(10, 2)
+  status         String        @default("active")
+  unit           Unit          @relation(fields: [unitId], references: [id])
+  ledgerEntries  LedgerEntry[]
+  aliases        TenantAlias[]
+  reviewItems    ReviewItem[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model TenantAlias {
+  id         String   @id @default(uuid())
+  aliasText  String
+  tenantId   String
+  source     String
+  confidence Float
+  requestId  String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@index([aliasText])
+}
+
+model LedgerEntry {
+  id            String   @id @default(uuid())
+  tenantId      String
+  effectiveDate DateTime @db.Date
+  postedAt      DateTime @default(now())
+  amount        Decimal  @db.Decimal(10, 2)
+  type          String
+  category      String
+  paymentMethod String?
+  source        String?
+  memo          String?
+  requestId     String
+  postedBy      String
+  status        String   @default("active")
+  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt     DateTime @default(now())
+
+  @@index([tenantId, effectiveDate])
+}
+
+model Job {
+  id          String    @id @default(uuid())
+  type        String
+  status      String    @default("queued")
+  step        String?
+  inputData   Json?
+  outputData  Json?
+  error       String?
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
+  requestId   String
+  enqueuedAt  DateTime  @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+}
+
+model ReviewItem {
+  id                String    @id @default(uuid())
+  jobId             String    @unique
+  suggestedTenantId String?
+  extractedData     Json
+  reasoningData     Json
+  imageBase64       String?   @db.Text
+  requestId         String
+  status            String    @default("pending")
+  tenant            Tenant?   @relation(fields: [suggestedTenantId], references: [id])
+  createdAt         DateTime  @default(now())
+  resolvedAt        DateTime?
+}
+
+model InboxItem {
+  id         String    @id @default(uuid())
+  type       String
+  severity   String    @default("medium")
+  title      String
+  summary    String
+  data       Json
+  requestId  String
+  status     String    @default("open")
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+}
