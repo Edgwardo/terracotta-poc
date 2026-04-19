@@ -1,6 +1,6 @@
 # terracotta-poc
 
-Subsidized housing landlords pay $300+/month for legacy tenant ledger platforms and still spend hours on clerical work — keying in money orders, logging receipts, matching HAP deposits. This is one slice of Terracotta, a system I'm building to replace that work. Claude Opus 4.7 reads the money order, the system finds the tenant, Claude reasons about the match, and a human confirms exceptions. Every correction makes the next scan smarter.
+Subsidized-housing landlords still spend many hours every month doing clerical work that legacy software does not solve well: keying in money orders, matching HAP deposits, and correcting tenant-name mismatches by hand. Terracotta is an agentic rent-operations system built for my family’s 134-unit Section 8 portfolio. Claude Opus 4.7 reads the document, the system finds the tenant, Claude reasons about the match, and a human reviews uncertainty. Every correction writes an alias, so the next scan gets smarter.
 
 **[Live demo →](https://terracotta-poc.vercel.app)**
 
@@ -27,11 +27,10 @@ Terracotta isn't OCR glued to a database. Opus 4.7 first does high-resolution vi
 - **Alias learning loop.** Every human correction writes to a `tenant_aliases` table, so the second scan of a misspelled name auto-routes. The system compounds accuracy over time without schema changes — this is the "gets smarter the more you use it" property, powered by Claude's reasoning plus a lightweight learning surface.
 - **Auditable agent loop.** A `jobs` table with a step state machine (extracting → matching → reasoning → routing), end-to-end `request_id` propagation, and distinct operational categories for `scan_no_match` vs `scan_refusal` vs `scan_low_confidence`. Refusals are handled as a first-class operational signal, not swept under a generic failure bucket.
 
-Built with Claude Code to automate work my father still does by hand across his 134-unit Section 8 portfolio.
 
 ## Built with Claude Code
 
-Built in a single focused 6-hour hackathon-style session, the POC moved through 9 gated phases from scaffold to live production deploy, following a written build spec (`docs/BUILD_SPEC.md`). Each phase had explicit entry criteria and ended with a manual gate test against a live Supabase DB, verified in Prisma Studio and in the browser. Every file write was diff-first and reviewed before commit. The git history has one logical commit per phase, giving clean rollback points.
+Built in a single focused 6-hour hackathon-style session, the POC moved through 9 gated phases from scaffold to live deploy, following a written build spec (`docs/BUILD_SPEC.md`). Each phase had explicit entry criteria and ended with a manual gate test against a live Supabase DB, verified in Prisma Studio and in the browser. Every file write was diff-first and reviewed before commit. The git history has one logical commit per phase, giving clean rollback points.
 
 ## Run locally
 
