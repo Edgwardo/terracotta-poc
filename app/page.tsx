@@ -42,7 +42,12 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-6xl p-6 space-y-8">
-      <h1 className="text-2xl font-semibold">Terracotta</h1>
+      <header className="space-y-1">
+        <h1 className="text-2xl font-semibold">Terracotta</h1>
+        <a href="/inbox" className="text-sm text-blue-600 underline">
+          Inbox
+        </a>
+      </header>
       <UploadZone onUploadSuccess={bumpRefresh} />
       <ReviewQueue refreshKey={refreshKey} />
       <LiveJobsPanel />
