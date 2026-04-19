@@ -291,7 +291,18 @@ function ReviewRow({
       <td className="py-2 pr-3">
         {typeof amount === "number" ? `$${amount.toFixed(2)}` : "—"}
       </td>
-      <td className="py-2 pr-3">{suggestedTenantName}</td>
+      <td className="py-2 pr-3">
+        {item.tenant ? (
+          <a
+            href={`/tenants/${item.tenant.id}`}
+            className="text-blue-600 underline"
+          >
+            {suggestedTenantName}
+          </a>
+        ) : (
+          suggestedTenantName
+        )}
+      </td>
       <td className="py-2 pr-3">
         <span
           className={`inline-block rounded px-2 py-0.5 text-xs ${badgeTone}`}
